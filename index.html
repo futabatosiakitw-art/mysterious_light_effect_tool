@@ -30,28 +30,30 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* 全体のスクロールを禁止 */
         }
 
         header {
             background-color: var(--panel-bg);
             border-bottom: 1px solid var(--panel-border);
-            padding: 1rem 2rem;
+            padding: 0.75rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 55px;
         }
 
         header h1 {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 700;
             letter-spacing: 0.05em;
         }
 
         .privacy-badge {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             background-color: rgba(59, 130, 246, 0.15);
             color: #60a5fa;
-            padding: 0.35rem 0.75rem;
+            padding: 0.3rem 0.7rem;
             border-radius: 9999px;
             border: 1px solid rgba(59, 130, 246, 0.3);
         }
@@ -59,7 +61,7 @@
         .main-container {
             display: flex;
             flex: 1;
-            height: calc(100vh - 65px);
+            height: calc(100vh - 55px);
             overflow: hidden;
         }
 
@@ -69,82 +71,102 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: repeating-conic-gradient(#1e293b 0% 25%, #0f172a 0% 50%) 50% / 20px 20px;
+            /* チェック柄の背景 */
+            background-image: 
+                linear-gradient(45deg, var(--panel-border) 25%, transparent 25%), 
+                linear-gradient(-45deg, var(--panel-border) 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, var(--panel-border) 75%), 
+                linear-gradient(-45deg, transparent 75%, var(--panel-border) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            background-color: #111827;
             position: relative;
             overflow: hidden;
-            padding: 2rem;
+            padding: 1rem;
         }
 
-        .canvas-wrapper {
+        .canvas-container {
             position: relative;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
             max-width: 100%;
             max-height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
+            /* 画像のサイズに合わせてコンテナもリサイズされるようにする */
+            line-height: 0; 
         }
 
         canvas {
             display: block;
+            /* CSSでサイズを固定せず、親コンテナに合わせる */
             max-width: 100%;
-            max-height: calc(100vh - 150px);
+            max-height: calc(100vh - 90px); /* ヘッダーとパディング分を引く */
+            width: auto;
+            height: auto;
             object-fit: contain;
             cursor: crosshair;
+            /* 画像の背景を白にする（透過PNG対策） */
+            background-color: white;
         }
 
         /* ドラッグドロップオーバーレイ */
         .dropzone-overlay {
             position: absolute;
             inset: 0;
-            background-color: rgba(15, 23, 42, 0.85);
+            background-color: rgba(15, 23, 42, 0.9);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border: 3px dashed var(--accent);
-            margin: 1.5rem;
+            border: 4px dashed var(--accent);
+            margin: 1rem;
             border-radius: 1rem;
             cursor: pointer;
-            transition: background-color 0.2s;
-            z-index: 10;
+            transition: all 0.2s;
+            z-index: 20;
         }
 
         .dropzone-overlay.dragover {
             background-color: rgba(30, 41, 59, 0.95);
             border-color: #60a5fa;
+            transform: scale(1.02);
         }
 
         .dropzone-overlay h2 {
             font-size: 1.5rem;
             margin-bottom: 0.5rem;
+            pointer-events: none;
         }
 
         .dropzone-overlay p {
             color: var(--text-sub);
-            font-size: 0.95rem;
+            font-size: 1rem;
+            pointer-events: none;
         }
 
         /* コントロールパネル */
         .control-panel {
-            width: 380px;
+            width: 350px;
+            min-width: 350px;
             background-color: var(--panel-bg);
             border-left: 1px solid var(--panel-border);
             display: flex;
             flex-direction: column;
             height: 100%;
             overflow-y: auto;
+            font-size: 0.9rem;
         }
 
         .panel-section {
-            padding: 1.25rem;
+            padding: 1rem;
             border-bottom: 1px solid var(--panel-border);
         }
 
         .panel-section h3 {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             color: var(--text-main);
             display: flex;
             justify-content: space-between;
@@ -155,32 +177,33 @@
         .layer-list {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            max-height: 160px;
+            gap: 0.4rem;
+            max-height: 150px;
             overflow-y: auto;
             margin-bottom: 0.75rem;
+            padding-right: 5px;
         }
 
         .layer-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 0.75rem;
+            padding: 0.4rem 0.6rem;
             background-color: rgba(15, 23, 42, 0.5);
             border: 1px solid var(--panel-border);
-            border-radius: 0.375rem;
+            border-radius: 0.3rem;
             cursor: pointer;
-            font-size: 0.9rem;
             transition: all 0.2s;
         }
 
         .layer-item:hover {
             border-color: var(--text-sub);
+            background-color: rgba(30, 41, 59, 0.8);
         }
 
         .layer-item.active {
             border-color: var(--accent);
-            background-color: rgba(59, 130, 246, 0.1);
+            background-color: rgba(59, 130, 246, 0.15);
         }
 
         .layer-name {
@@ -188,11 +211,13 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             flex: 1;
+            font-weight: 500;
+            pointer-events: none;
         }
 
         .layer-actions {
             display: flex;
-            gap: 0.35rem;
+            gap: 0.25rem;
             margin-left: 0.5rem;
         }
 
@@ -201,11 +226,12 @@
             border: none;
             color: var(--text-sub);
             cursor: pointer;
-            padding: 0.2rem;
-            border-radius: 0.25rem;
+            padding: 0.15rem;
+            border-radius: 0.2rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1;
         }
 
         .icon-btn:hover {
@@ -215,11 +241,12 @@
 
         .icon-btn.delete:hover {
             color: var(--danger);
+            background-color: rgba(239, 68, 68, 0.15);
         }
 
         /* フォームコントロール */
         .control-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .control-group:last-child {
@@ -229,37 +256,40 @@
         .control-label {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-sub);
-            margin-bottom: 0.35rem;
+            margin-bottom: 0.25rem;
         }
 
         .control-inputs {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
 
         input[type="range"] {
             flex: 1;
             accent-color: var(--accent);
             cursor: pointer;
+            height: 5px;
         }
 
         input[type="number"] {
-            width: 70px;
+            width: 60px;
             background-color: var(--bg-color);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            font-size: 0.9rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.3rem;
+            font-size: 0.85rem;
             text-align: right;
+            appearance: textfield; /* スピンボタンを非表示にする（webkit以外） */
         }
 
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
-            opacity: 1;
+            opacity: 1; /* スピンボタンを表示する（webkit） */
+            height: 1.5rem;
         }
 
         select, input[type="color"] {
@@ -267,35 +297,38 @@
             background-color: var(--bg-color);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
-            padding: 0.5rem;
-            border-radius: 0.375rem;
+            padding: 0.4rem;
+            border-radius: 0.3rem;
             font-size: 0.9rem;
         }
 
         select {
             cursor: pointer;
+            appearance: menulist;
         }
 
         input[type="color"] {
-            height: 40px;
+            height: 32px;
             cursor: pointer;
-            padding: 0.25rem;
+            padding: 0.15rem;
+            border: 1px solid var(--panel-border);
         }
 
         /* ボタン */
         .btn {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.6rem;
             border: none;
-            border-radius: 0.5rem;
+            border-radius: 0.3rem;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 0.5rem;
-            transition: background-color 0.2s;
+            gap: 0.4rem;
+            transition: all 0.2s;
+            line-height: 1.2;
         }
 
         .btn-primary {
@@ -315,6 +348,7 @@
 
         .btn-secondary:hover {
             background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--text-sub);
         }
 
         .btn-danger {
@@ -325,11 +359,7 @@
 
         .btn-danger:hover {
             background-color: rgba(239, 68, 68, 0.25);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 0.5rem;
+            border-color: var(--danger);
         }
 
         .disabled {
@@ -339,18 +369,23 @@
 
         /* スクロールバー装飾 */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
         }
         ::-webkit-scrollbar-track {
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
             background: var(--panel-border);
-            border-radius: 3px;
+            border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-sub);
+        }
+
+        /* ツールチップ */
+        [title] {
+            position: relative;
         }
     </style>
 </head>
@@ -370,7 +405,7 @@
                 <input type="file" id="fileInput" accept="image/*" style="display: none;">
             </div>
 
-            <div class="canvas-wrapper">
+            <div class="canvas-container">
                 <canvas id="canvas"></canvas>
             </div>
         </div>
@@ -401,9 +436,7 @@
                 <h3>光の設定</h3>
                 
                 <div class="control-group">
-                    <label class="control-label">
-                        <span>種類</span>
-                    </label>
+                    <label class="control-label">種類</label>
                     <select id="lightType">
                         <option value="white-glow">白光バー (発光グラデーション)</option>
                         <option value="black-bar">黒帯 (シークレットバー)</option>
@@ -413,467 +446,12 @@
                 </div>
 
                 <div class="control-group" id="colorGroup">
-                    <label class="control-label">
-                        <span>光の色</span>
-                    </label>
+                    <label class="control-label">光の色</label>
                     <input type="color" id="lightColor" value="#ffffff">
                 </div>
 
                 <div class="control-group">
-                    <label class="control-label">
-                        <span>位置 X (%)</span>
-                    </label>
+                    <label class="control-label"><span>位置 X (%)</span></label>
                     <div class="control-inputs">
                         <input type="range" id="posXRange" min="-150" max="150" step="1" value="0">
-                        <input type="number" id="posXNum" min="-150" max="150" step="1" value="0">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label">
-                        <span>位置 Y (%)</span>
-                    </label>
-                    <div class="control-inputs">
-                        <input type="range" id="posYRange" min="-150" max="150" step="1" value="0">
-                        <input type="number" id="posYNum" min="-150" max="150" step="1" value="0">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label">
-                        <span>幅 (%) <small style="color:var(--text-sub);">※長辺基準</small></span>
-                    </label>
-                    <div class="control-inputs">
-                        <input type="range" id="widthRange" min="5" max="150" step="1" value="60">
-                        <input type="number" id="widthNum" min="5" max="150" step="1" value="60">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label">
-                        <span>高さ (%) <small style="color:var(--text-sub);">※長辺基準</small></span>
-                    </label>
-                    <div class="control-inputs">
-                        <input type="range" id="heightRange" min="1" max="150" step="1" value="15">
-                        <input type="number" id="heightNum" min="1" max="150" step="1" value="15">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label">
-                        <span>角度 (度)</span>
-                    </label>
-                    <div class="control-inputs">
-                        <input type="range" id="angleRange" min="-180" max="180" step="1" value="0">
-                        <input type="number" id="angleNum" min="-180" max="180" step="1" value="0">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label">
-                        <span>不透明度 (%)</span>
-                    </label>
-                    <div class="control-inputs">
-                        <input type="range" id="opacityRange" min="0" max="100" step="1" value="100">
-                        <input type="number" id="opacityNum" min="0" max="100" step="1" value="100">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label">
-                        <span>ぼかし (px)</span>
-                    </label>
-                    <div class="control-inputs">
-                        <input type="range" id="blurRange" min="0" max="50" step="1" value="10">
-                        <input type="number" id="blurNum" min="0" max="50" step="1" value="10">
-                    </div>
-                </div>
-            </div>
-
-            <!-- エクスポート -->
-            <div class="panel-section">
-                <button class="btn btn-primary" id="downloadBtn" style="padding: 1rem;">画像をダウンロード (PNG)</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // アプリケーションの状態
-        const state = {
-            image: null,
-            imageName: '',
-            baseSize: 0, // プレビュー・計算用の長辺サイズ
-            lights: [],
-            activeLightId: null
-        };
-
-        // DOM要素
-        const workspace = document.getElementById('workspace');
-        const dropzone = document.getElementById('dropzone');
-        const fileInput = document.getElementById('fileInput');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const changeImageBtn = document.getElementById('changeImageBtn');
-        const resetAllBtn = document.getElementById('resetAllBtn');
-        const addLightBtn = document.getElementById('addLightBtn');
-        const layerList = document.getElementById('layerList');
-        const layerCount = document.getElementById('layerCount');
-        const propertiesPanel = document.getElementById('propertiesPanel');
-        const downloadBtn = document.getElementById('downloadBtn');
-
-        // 入力コントロール
-        const controls = {
-            type: document.getElementById('lightType'),
-            colorGroup: document.getElementById('colorGroup'),
-            color: document.getElementById('lightColor'),
-            posXRange: document.getElementById('posXRange'),
-            posXNum: document.getElementById('posXNum'),
-            posYRange: document.getElementById('posYRange'),
-            posYNum: document.getElementById('posYNum'),
-            widthRange: document.getElementById('widthRange'),
-            widthNum: document.getElementById('widthNum'),
-            heightRange: document.getElementById('heightRange'),
-            heightNum: document.getElementById('heightNum'),
-            angleRange: document.getElementById('angleRange'),
-            angleNum: document.getElementById('angleNum'),
-            opacityRange: document.getElementById('opacityRange'),
-            opacityNum: document.getElementById('opacityNum'),
-            blurRange: document.getElementById('blurRange'),
-            blurNum: document.getElementById('blurNum')
-        };
-
-        // 初期状態の制御
-        function updateUIState() {
-            const hasImage = state.image !== null;
-            dropzone.style.display = hasImage ? 'none' : 'flex';
-            
-            const hasActiveLight = state.activeLightId !== null && hasImage;
-            propertiesPanel.style.opacity = hasActiveLight ? '1' : '0.4';
-            propertiesPanel.style.pointerEvents = hasActiveLight ? 'auto' : 'none';
-            downloadBtn.classList.toggle('disabled', !hasImage);
-            addLightBtn.classList.toggle('disabled', !hasImage);
-        }
-
-        // ファイル読込処理
-        function handleImageFile(file) {
-            if (!file || !file.type.startsWith('image/')) return;
-            state.imageName = file.name;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    state.image = img;
-                    state.baseSize = Math.max(img.width, img.height);
-                    
-                    // 初期ライトがなければ1つ自動追加
-                    if (state.lights.length === 0) {
-                        addLightLayer();
-                    } else {
-                        updateCanvas();
-                        renderLayerList();
-                    }
-                    updateUIState();
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // イベントリスナー: ドラッグ＆ドロップ
-        dropzone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) handleImageFile(e.target.files[0]);
-        });
-
-        workspace.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropzone.classList.add('dragover');
-        });
-        workspace.addEventListener('dragleave', () => {
-            dropzone.classList.remove('dragover');
-        });
-        workspace.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropzone.classList.remove('dragover');
-            if (e.dataTransfer.files[0]) handleImageFile(e.dataTransfer.files[0]);
-        });
-
-        changeImageBtn.addEventListener('click', () => fileInput.click());
-        resetAllBtn.addEventListener('click', () => {
-            state.image = null;
-            state.lights = [];
-            state.activeLightId = null;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            canvas.width = 0;
-            canvas.height = 0;
-            updateUIState();
-            renderLayerList();
-        });
-
-        // 光レイヤー追加
-        function addLightLayer() {
-            const id = 'light_' + Date.now();
-            const newLight = {
-                id: id,
-                name: `光レイヤー ${state.lights.length + 1}`,
-                type: 'white-glow',
-                color: '#ffffff',
-                posX: 0,   // % (-150 ~ 150)
-                posY: 0,   // % (-150 ~ 150)
-                width: 60, // %
-                height: 15,// %
-                angle: 0,  // 度
-                opacity: 100, // %
-                blur: 10   // px
-            };
-            state.lights.push(newLight);
-            selectLight(id);
-        }
-
-        addLightBtn.addEventListener('click', () => {
-            if (!state.image) return;
-            addLightLayer();
-        });
-
-        function selectLight(id) {
-            state.activeLightId = id;
-            renderLayerList();
-            loadLightToControls();
-        }
-
-        function deleteLight(id, e) {
-            e.stopPropagation();
-            state.lights = state.lights.filter(l => l.id !== id);
-            if (state.activeLightId === id) {
-                state.activeLightId = state.lights.length > 0 ? state.lights[state.lights.length - 1].id : null;
-            }
-            renderLayerList();
-            loadLightToControls();
-            updateCanvas();
-            updateUIState();
-        }
-
-        // レイヤーリスト描画
-        function renderLayerList() {
-            layerList.innerHTML = '';
-            layerCount.textContent = `${state.lights.length}個`;
-            
-            state.lights.forEach((light, index) => {
-                const item = document.createElement('div');
-                item.className = `layer-item ${light.id === state.activeLightId ? 'active' : ''}`;
-                item.innerHTML = `
-                    <span class="layer-name">${light.name}</span>
-                    <div class="layer-actions">
-                        <button class="icon-btn delete" title="削除">×</button>
-                    </div>
-                `;
-                item.addEventListener('click', () => selectLight(light.id));
-                item.querySelector('.delete').addEventListener('click', (e) => deleteLight(light.id, e));
-                layerList.appendChild(item);
-            });
-        }
-
-        // 選択中の光データをコントロールパネルに反映
-        function loadLightToControls() {
-            const light = state.lights.find(l => l.id === state.activeLightId);
-            if (!light) return;
-
-            controls.type.value = light.type;
-            controls.color.value = light.color;
-            controls.colorGroup.style.display = (light.type === 'white-glow' || light.type === 'solid-color') ? 'block' : 'none';
-            
-            const setSyncVal = (range, num, val) => {
-                range.value = val;
-                num.value = val;
-            };
-
-            setSyncVal(controls.posXRange, controls.posXNum, light.posX);
-            setSyncVal(controls.posYRange, controls.posYNum, light.posY);
-            setSyncVal(controls.widthRange, controls.widthNum, light.width);
-            setSyncVal(controls.heightRange, controls.heightNum, light.height);
-            setSyncVal(controls.angleRange, controls.angleNum, light.angle);
-            setSyncVal(controls.opacityRange, controls.opacityNum, light.opacity);
-            setSyncVal(controls.blurRange, controls.blurNum, light.blur);
-        }
-
-        // コントロール変更をアクティブレイヤーに反映
-        function updateActiveLightFromControls() {
-            const light = state.lights.find(l => l.id === state.activeLightId);
-            if (!light) return;
-
-            light.type = controls.type.value;
-            light.color = controls.color.value;
-            light.posX = parseFloat(controls.posXNum.value) || 0;
-            light.posY = parseFloat(controls.posYNum.value) || 0;
-            light.width = parseFloat(controls.widthNum.value) || 1;
-            light.height = parseFloat(controls.heightNum.value) || 1;
-            light.angle = parseFloat(controls.angleNum.value) || 0;
-            light.opacity = parseFloat(controls.opacityNum.value) || 0;
-            light.blur = parseFloat(controls.blurNum.value) || 0;
-
-            controls.colorGroup.style.display = (light.type === 'white-glow' || light.type === 'solid-color') ? 'block' : 'none';
-
-            updateCanvas();
-        }
-
-        // スライダーと数値の同期バインド
-        function bindSyncInputs(range, num, callback) {
-            range.addEventListener('input', () => {
-                num.value = range.value;
-                callback();
-            });
-            num.addEventListener('input', () => {
-                range.value = num.value;
-                callback();
-            });
-        }
-
-        controls.type.addEventListener('change', updateActiveLightFromControls);
-        controls.color.addEventListener('input', updateActiveLightFromControls);
-        bindSyncInputs(controls.posXRange, controls.posXNum, updateActiveLightFromControls);
-        bindSyncInputs(controls.posYRange, controls.posYNum, updateActiveLightFromControls);
-        bindSyncInputs(controls.widthRange, controls.widthNum, updateActiveLightFromControls);
-        bindSyncInputs(controls.heightRange, controls.heightNum, updateActiveLightFromControls);
-        bindSyncInputs(controls.angleRange, controls.angleNum, updateActiveLightFromControls);
-        bindSyncInputs(controls.opacityRange, controls.opacityNum, updateActiveLightFromControls);
-        bindSyncInputs(controls.blurRange, controls.blurNum, updateActiveLightFromControls);
-
-        // キャンバス描画処理
-        function updateCanvas() {
-            if (!state.image) return;
-
-            // 実解像度を保持
-            canvas.width = state.image.width;
-            canvas.height = state.image.height;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(state.image, 0, 0);
-
-            const baseSize = state.baseSize;
-
-            state.lights.forEach(light => {
-                ctx.save();
-                ctx.globalAlpha = light.opacity / 100;
-
-                // %指定（長辺基準）をピクセルに変換
-                const w = (light.width / 100) * baseSize;
-                const h = (light.height / 100) * baseSize;
-                
-                // 画面中心からのオフセット
-                const centerX = canvas.width / 2 + (light.posX / 100) * baseSize;
-                const centerY = canvas.height / 2 + (light.posY / 100) * baseSize;
-
-                ctx.translate(centerX, centerY);
-                ctx.rotate((light.angle * Math.PI) / 180);
-
-                const x = -w / 2;
-                const y = -h / 2;
-
-                if (light.type === 'white-glow') {
-                    // 発光バー
-                    ctx.shadowColor = light.color;
-                    ctx.shadowBlur = light.blur * (baseSize / 800); // 解像度に応じたスケーリング
-                    
-                    const grad = ctx.createLinearGradient(0, y, 0, y + h);
-                    grad.addColorStop(0, 'rgba(255,255,255,0)');
-                    grad.addColorStop(0.3, light.color);
-                    grad.addColorStop(0.7, light.color);
-                    grad.addColorStop(1, 'rgba(255,255,255,0)');
-
-                    ctx.fillStyle = grad;
-                    ctx.fillRect(x, y, w, h);
-                } 
-                else if (light.type === 'black-bar') {
-                    // 黒帯
-                    if (light.blur > 0) {
-                        ctx.filter = `blur(${light.blur * (baseSize / 800)}px)`;
-                    }
-                    ctx.fillStyle = '#000000';
-                    ctx.fillRect(x, y, w, h);
-                } 
-                else if (light.type === 'mosaic') {
-                    // モザイク風ぼかし (簡易的に強いガウスぼかし＋格子)
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(x, y, w, h);
-                    ctx.clip();
-                    
-                    ctx.filter = `blur(${Math.max(4, light.blur * (baseSize / 400))}px)`;
-                    ctx.drawImage(state.image, 0, 0);
-                    ctx.restore();
-                } 
-                else if (light.type === 'solid-color') {
-                    // ベタ塗り
-                    if (light.blur > 0) {
-                        ctx.filter = `blur(${light.blur * (baseSize / 800)}px)`;
-                    }
-                    ctx.fillStyle = light.color;
-                    ctx.fillRect(x, y, w, h);
-                }
-
-                ctx.restore();
-            });
-        }
-
-        // キャンバス上のドラッグによる光の位置移動
-        let isDraggingCanvas = false;
-        let dragStartX = 0;
-        let dragStartY = 0;
-        let initialLightPosX = 0;
-        let initialLightPosY = 0;
-
-        canvas.addEventListener('mousedown', (e) => {
-            if (!state.image || !state.activeLightId) return;
-            isDraggingCanvas = true;
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-            
-            const light = state.lights.find(l => l.id === state.activeLightId);
-            initialLightPosX = light.posX;
-            initialLightPosY = light.posY;
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDraggingCanvas) return;
-            const light = state.lights.find(l => l.id === state.activeLightId);
-            if (!light) return;
-
-            // 画面上の表示サイズと実キャンバスサイズの比率を考慮
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            const dx = (e.clientX - dragStartX) * scaleX;
-            const dy = (e.clientY - dragStartY) * scaleY;
-
-            // ピクセル移動量を % (%は長辺ベース) に変換
-            const deltaPercentX = (dx / state.baseSize) * 100;
-            const deltaPercentY = (dy / state.baseSize) * 100;
-
-            light.posX = Math.max(-150, Math.min(150, Math.round(initialLightPosX + deltaPercentX)));
-            light.posY = Math.max(-150, Math.min(150, Math.round(initialLightPosY + deltaPercentY)));
-
-            loadLightToControls();
-            updateCanvas();
-        });
-
-        window.addEventListener('mouseup', () => {
-            isDraggingCanvas = false;
-        });
-
-        // ダウンロード処理
-        downloadBtn.addEventListener('click', () => {
-            if (!state.image) return;
-            updateCanvas(); // 最終描画
-
-            const link = document.createElement('a');
-            const originalName = state.imageName.substring(0, state.imageName.lastIndexOf('.')) || 'image';
-            link.download = `${originalName}_light.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        });
-
-        updateUIState();
-    </script>
-</body>
-</html>
+                        <input type="
