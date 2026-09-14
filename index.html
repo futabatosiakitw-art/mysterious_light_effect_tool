@@ -30,30 +30,30 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         header {
             background-color: var(--panel-bg);
             border-bottom: 1px solid var(--panel-border);
-            padding: 0.75rem 1.5rem;
+            padding: 1rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 55px;
+            height: 65px;
+            flex-shrink: 0;
         }
 
         header h1 {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             font-weight: 700;
             letter-spacing: 0.05em;
         }
 
         .privacy-badge {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             background-color: rgba(59, 130, 246, 0.15);
             color: #60a5fa;
-            padding: 0.3rem 0.7rem;
+            padding: 0.35rem 0.75rem;
             border-radius: 9999px;
             border: 1px solid rgba(59, 130, 246, 0.3);
         }
@@ -61,8 +61,7 @@
         .main-container {
             display: flex;
             flex: 1;
-            height: calc(100vh - 55px);
-            overflow: hidden;
+            min-height: calc(100vh - 65px);
         }
 
         /* ワークスペース (プレビュー) */
@@ -80,8 +79,8 @@
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
             background-color: #111827;
             position: relative;
-            overflow: hidden;
-            padding: 1rem;
+            padding: 2rem;
+            overflow: auto;
         }
 
         .canvas-container {
@@ -98,7 +97,7 @@
         canvas {
             display: block;
             max-width: 100%;
-            max-height: calc(100vh - 90px);
+            max-height: calc(100vh - 140px);
             width: auto;
             height: auto;
             object-fit: contain;
@@ -116,7 +115,7 @@
             justify-content: center;
             align-items: center;
             border: 4px dashed var(--accent);
-            margin: 1rem;
+            margin: 1.5rem;
             border-radius: 1rem;
             cursor: pointer;
             transition: all 0.2s;
@@ -141,26 +140,29 @@
             pointer-events: none;
         }
 
-        /* コントロールパネル */
+        /* コントロールパネル (フロート＆スクロール対応) */
         .control-panel {
-            width: 350px;
-            min-width: 350px;
+            width: 380px;
+            min-width: 380px;
             background-color: var(--panel-bg);
             border-left: 1px solid var(--panel-border);
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: calc(100vh - 65px);
+            position: sticky;
+            top: 65px;
             overflow-y: auto;
             font-size: 0.9rem;
+            z-index: 10;
         }
 
         .panel-section {
-            padding: 1rem;
+            padding: 1.25rem;
             border-bottom: 1px solid var(--panel-border);
         }
 
         .panel-section h3 {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 600;
             margin-bottom: 0.75rem;
             color: var(--text-main);
@@ -242,7 +244,7 @@
 
         /* フォームコントロール */
         .control-group {
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.85rem;
         }
 
         .control-group:last-child {
@@ -252,15 +254,15 @@
         .control-label {
             display: flex;
             justify-content: space-between;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-sub);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.3rem;
         }
 
         .control-inputs {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         input[type="range"] {
@@ -271,13 +273,13 @@
         }
 
         input[type="number"] {
-            width: 65px;
+            width: 70px;
             background-color: var(--bg-color);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
-            padding: 0.15rem 0.4rem;
+            padding: 0.2rem 0.4rem;
             border-radius: 0.3rem;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             text-align: right;
         }
 
@@ -286,7 +288,7 @@
             background-color: var(--bg-color);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
-            padding: 0.4rem;
+            padding: 0.5rem;
             border-radius: 0.3rem;
             font-size: 0.9rem;
         }
@@ -296,27 +298,26 @@
         }
 
         input[type="color"] {
-            height: 32px;
+            height: 38px;
             cursor: pointer;
-            padding: 0.15rem;
+            padding: 0.2rem;
             border: 1px solid var(--panel-border);
         }
 
         /* ボタン */
         .btn {
             width: 100%;
-            padding: 0.6rem;
+            padding: 0.75rem;
             border: none;
-            border-radius: 0.3rem;
+            border-radius: 0.4rem;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
             transition: all 0.2s;
-            line-height: 1.2;
         }
 
         .btn-primary {
@@ -490,7 +491,7 @@
 
             <!-- エクスポート -->
             <div class="panel-section">
-                <button class="btn btn-primary" id="downloadBtn" style="padding: 0.8rem;">画像をダウンロード (PNG)</button>
+                <button class="btn btn-primary" id="downloadBtn" style="padding: 0.9rem;">画像をダウンロード (PNG)</button>
             </div>
         </div>
     </div>
@@ -618,7 +619,7 @@
             };
             state.lights.push(newLight);
             selectLight(id);
-            updateCanvas(); // 画像と最初のレイヤーが揃ったタイミングで描画を更新
+            updateCanvas();
         }
 
         addLightBtn.addEventListener('click', () => {
