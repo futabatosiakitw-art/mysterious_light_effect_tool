@@ -618,6 +618,7 @@
             };
             state.lights.push(newLight);
             selectLight(id);
+            updateCanvas(); // 画像と最初のレイヤーが揃ったタイミングで描画を更新
         }
 
         addLightBtn.addEventListener('click', () => {
