@@ -273,7 +273,7 @@
         }
 
         input[type="number"] {
-            width: 70px;
+            width: 75px;
             background-color: var(--bg-color);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
@@ -483,8 +483,8 @@
                 <div class="control-group">
                     <label class="control-label"><span>ぼかし (px)</span></label>
                     <div class="control-inputs">
-                        <input type="range" id="blurRange" min="0" max="50" step="1" value="10">
-                        <input type="number" id="blurNum" min="0" max="50" step="1" value="10">
+                        <input type="range" id="blurRange" min="0" max="500" step="1" value="50">
+                        <input type="number" id="blurNum" min="0" max="500" step="1" value="50">
                     </div>
                 </div>
             </div>
@@ -615,7 +615,7 @@
                 height: 15,
                 angle: 0,
                 opacity: 100,
-                blur: 10
+                blur: 50
             };
             state.lights.push(newLight);
             selectLight(id);
@@ -814,7 +814,7 @@
 
         window.addEventListener('mousemove', (e) => {
             if (!isDraggingCanvas) return;
-            const light = state.lights.find(l => l.id === state.activeLightId);
+            const light = state.lights.exports ? null : state.lights.find(l => l.id === state.activeLightId); // safeguard
             if (!light) return;
 
             const rect = canvas.getBoundingClientRect();
