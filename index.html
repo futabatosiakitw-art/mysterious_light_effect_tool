@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>謎の光エフェクト工房 - Anime Censorship & Multi-Light Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                            600: '#475569'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            user-select: none;
+        }
+        input[type="range"] {
+            accent-color: #38bdf8;
+        }
+        .checkerboard {
+            background-image: 
+                linear-gradient(45deg, #1e293b 25%, transparent 25%), 
+                linear-gradient(-45deg, #1e293b 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #1e293b 75%), 
+                linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <header class="border-b border-dark-700 bg-dark-800/80 backdrop-blur sticky top-0 z-50 px-4 py-3 shadow-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-cyan-500 to-indigo-500 p-2 rounded-xl shadow-lg shadow-cyan-500/20 text-white font-bold text-xl flex items-center justify-center w-10 h-10">
+                    ✨
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-wide text-white">謎の光エフェクト工房</h1>
+                    <p class="text-xs text-slate-400">Multi-Layer Anime Censorship Light Studio</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="reset-btn" class="px-3 py-1.5 text-xs font-medium bg-dark-700 hover:bg-dark-600 rounded-lg text-slate-300 transition-colors border border-dark-600">
+                    リセット
+                </button>
+                <button id="download-btn" disabled class="px-4 py-2 text-sm font-semibold bg-cyan-500 hover:bg-cyan-400 disabled:bg-dark-700 disabled:text-slate-500 disabled:cursor-not-allowed text-dark-900 rounded-xl transition-all shadow-lg shadow-cyan-500/20 flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>画像をダウンロード</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left Column: Canvas & Upload Area (8 columns) -->
+        <div class="lg:col-span-8 flex flex-col space-y-4">
+            
+            <!-- Upload Box (Shown when no image) -->
+            <div id="upload-container" class="border-2 border-dashed border-dark-600 hover:border-cyan-400/70 rounded-2xl p-10 text-center cursor-pointer bg-dark-800/40 hover:bg-dark-800/80 transition-all flex flex-col items-center justify-center min-h-[450px] relative group">
+                <input type="file" id="file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
+                <div class="w-20 h-20 bg-dark-700 rounded-2xl flex items-center justify-center text-4xl mb-4 group-hover:scale-110 group-hover:bg-cyan-500/10 group-hover:text-cyan-400 transition-all shadow-inner">
+                    📁
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-1">画像をここにドラッグ＆ドロップ</h3>
+                <p class="text-sm text-slate-400 mb-4">または、クリックしてファイルを選択 (PNG, JPG, WEBP)</p>
+                <span class="px-4 py-2 bg-dark-700 text-slate-300 text-xs font-medium rounded-lg border border-dark-600 group-hover:border-cyan-500/40">ファイルを選ぶ</span>
+                
+                <div class="mt-8 flex gap-2">
+                    <button type="button" id="demo-img-1" class="z-20 text-xs bg-dark-700 hover:bg-dark-600 px-3 py-1.5 rounded-lg text-slate-300 border border-dark-600">サンプル画像を使用</button>
+                </div>
+            </div>
+
+            <!-- Canvas Workspace (Shown when image loaded) -->
+            <div id="workspace-container" class="hidden flex flex-col space-y-3">
+                <div class="relative w-full rounded-2xl overflow-hidden border border-dark-700 bg-dark-900 shadow-2xl flex items-center justify-center min-h-[400px] checkerboard">
+                    <!-- Main Interactive Canvas -->
+                    <canvas id="canvas" class="max-w-full max-h-[60vh] object-contain cursor-grab active:cursor-grabbing shadow-lg"></canvas>
+                    
+                    <!-- Floating quick tips -->
+                    <div class="absolute bottom-3 left-3 bg-dark-900/80 backdrop-blur px-3 py-1.5 rounded-lg text-xs text-slate-300 border border-dark-700 pointer-events-none flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <span>選択中の光をキャンバス上で直接ドラッグして動かせます (-150%〜+150%対応)</span>
+                    </div>
+                </div>
+                
+                <!-- Quick preset layer buttons -->
+                <div class="flex items-center justify-between bg-dark-800 p-3 rounded-xl border border-dark-700 flex-wrap gap-2">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">光のプリセット</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button data-preset="glow-bar" class="preset-btn px-3 py-1 text-xs font-medium bg-cyan-500 text-dark-900 rounded-lg transition-colors font-bold shadow">アニメ白光バー</button>
+                        <button data-preset="soft-glow" class="preset-btn px-3 py-1 text-xs font-medium bg-dark-700 hover:bg-dark-600 text-slate-300 rounded-lg transition-colors border border-dark-600">ふんわり発光</button>
+                        <button data-preset="beam-laser" class="preset-btn px-3 py-1 text-xs font-medium bg-dark-700 hover:bg-dark-600 text-slate-300 rounded-lg transition-colors border border-dark-600">極太レーザー</button>
+                        <button data-preset="black-bar" class="preset-btn px-3 py-1 text-xs font-medium bg-dark-700 hover:bg-dark-600 text-slate-300 rounded-lg transition-colors border border-dark-600">黒帯検閲</button>
+                        <button data-preset="mosaic" class="preset-btn px-3 py-1 text-xs font-medium bg-dark-700 hover:bg-dark-600 text-slate-300 rounded-lg transition-colors border border-dark-600">モザイク風</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image change action -->
+            <div id="change-image-wrapper" class="hidden flex justify-end">
+                <label class="cursor-pointer text-xs text-cyan-400 hover:text-cyan-300 underline font-medium flex items-center space-x-1">
+                    <span>別の画像に変更する</span>
+                    <input type="file" id="file-input-replace" accept="image/*" class="hidden">
+                </label>
+            </div>
+        </div>
+
+        <div class="lg:col-span-4 bg-dark-800 border border-dark-700 rounded-2xl p-5 flex flex-col space-y-6 shadow-xl">
+            
+            <!-- Layer Management Section -->
+            <div class="space-y-3 pb-4 border-b border-dark-700">
+                <div class="flex items-center justify-between">
+                    <h2 class="font-bold text-sm text-white flex items-center space-x-2">
+                        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        <span>光レイヤー管理</span>
+                    </h2>
+                    <button id="add-layer-btn" class="px-3 py-1.5 text-xs font-semibold bg-cyan-500 hover:bg-cyan-400 text-dark-900 rounded-lg transition-all shadow flex items-center space-x-1">
+                        <span>＋ 光を追加</span>
+                    </button>
+                </div>
+                <!-- Layer List Container -->
+                <div id="layer-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                    <!-- Dynamic layer items inserted here -->
+                </div>
+            </div>
+
+            <!-- Effect Type & Sliders Panel -->
+            <div class="space-y-4 text-sm" id="controls-wrapper">
+                <div class="border-b border-dark-700 pb-2 flex items-center justify-between">
+                    <span id="active-layer-title" class="font-bold text-xs text-cyan-400">レイヤー 1 の調整</span>
+                    <button id="delete-layer-btn" class="text-xs text-rose-400 hover:text-rose-300 transition-colors">この光を削除</button>
+                </div>
+
+                <!-- Effect Type Selection -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-300">エフェクト種類</label>
+                    <select id="effect-type" class="w-full bg-dark-900 border border-dark-600 rounded-xl px-3 py-2 text-slate-200 text-xs focus:outline-none focus:border-cyan-500">
+                        <option value="glow-bar">アニメ風発光バー（白）</option>
+                        <option value="solid-bar">純白ソリッドバー</option>
+                        <option value="black-bar">黒帯（TV修正風）</option>
+                        <option value="mosaic">モザイクぼかし</option>
+                        <option value="steam">湯気・湯気風ホワイト</option>
+                    </select>
+                </div>
+
+                <!-- Width & Height Sliders (-150% to 150%) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs text-slate-300">
+                            <span>幅 (Width)</span>
+                            <span id="val-width" class="font-mono text-cyan-400">40%</span>
+                        </div>
+                        <input type="range" id="range-width" min="-150" max="150" value="40" class="w-full h-1.5 bg-dark-900 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs text-slate-300">
+                            <span>高さ (Height)</span>
+                            <span id="val-height" class="font-mono text-cyan-400">10%</span>
+                        </div>
+                        <input type="range" id="range-height" min="-150" max="150" value="10" class="w-full h-1.5 bg-dark-900 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- X & Y Position Sliders (-150% to 150%) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs text-slate-300">
+                            <span>X 座標</span>
+                            <span id="val-x" class="font-mono text-cyan-400">30%</span>
+                        </div>
+                        <input type="range" id="range-x" min="-150" max="150" value="30" class="w-full h-1.5 bg-dark-900 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs text-slate-300">
+                            <span>Y 座標</span>
+                            <span id="val-y" class="font-mono text-cyan-400">45%</span>
+                        </div>
+                        <input type="range" id="range-y" min="-150" max="150" value="45" class="w-full h-1.5 bg-dark-900 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Rotation Angle -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs text-slate-300">
+                        <span>回転角度 (Angle)</span>
+                        <span id="val-angle" class="font-mono text-cyan-400">0°</span>
+                    </div>
+                    <input type="range" id="range-angle" min="-180" max="180" value="0" class="w-full h-1.5 bg-dark-900 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Opacity -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs text-slate-300">
+                        <span>不透明度 (Opacity)</span>
+                        <span id="val-opacity" class="font-mono text-cyan-400">95%</span>
+                    </div>
+                    <input type="range" id="range-opacity" min="10" max="100" value="95" class="w-full h-1.5 bg-dark-900 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Blur / Glow Intensity -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs text-slate-300">
+                        <span>発光ぼかし (Blur / Glow)</span>
+                        <span id="val-blur" class="font-mono text-cyan-400">12px</span>
+                    </div>
+                    <input type="range" id="range-blur" min="0" max="50" value="12" class="w-full h-1.5 bg-dark-900 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Additional styling toggles -->
+                <div class="pt-3 border-t border-dark-700 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-300">グラデーション端のぼかし</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="check-gradient" checked class="sr-only peer">
+                            <div class="w-9 h-5 bg-dark-900 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Quick positioning shortcuts -->
+            <div class="pt-2">
+                <span class="text-xs font-semibold text-slate-400 block mb-2">クイック配置</span>
+                <div class="grid grid-cols-3 gap-2">
+                    <button data-align="center" class="align-btn py-1.5 text-xs bg-dark-700 hover:bg-dark-600 rounded-lg text-slate-300 border border-dark-600">中央配置</button>
+                    <button data-align="horizontal" class="align-btn py-1.5 text-xs bg-dark-700 hover:bg-dark-600 rounded-lg text-slate-300 border border-dark-600">横長フル</button>
+                    <button data-align="vertical" class="align-btn py-1.5 text-xs bg-dark-700 hover:bg-dark-600 rounded-lg text-slate-300 border border-dark-600">縦長フル</button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="text-center py-4 text-xs text-slate-500 border-t border-dark-800 mt-auto">
+        謎の光エフェクト工房 &copy; 2026 - Multi-Layer Anime Censorship Tool
+    </footer>
+
+    <!-- Custom Notification Box -->
+    <div id="notification-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-dark-800 border border-dark-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+            <div id="modal-icon" class="w-12 h-12 rounded-full bg-cyan-500/10 text-cyan-400 text-xl flex items-center justify-center mx-auto">ℹ️</div>
+            <h4 id="modal-title" class="font-bold text-lg text-white">お知らせ</h4>
+            <p id="modal-message" class="text-sm text-slate-300">メッセージがここに表示されます。</p>
+            <button id="modal-close" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-dark-900 font-semibold rounded-xl transition-colors">確認</button>
+        </div>
+    </div>
+
+    <script>
+        // Multi-Layer State Management
+        const state = {
+            image: null,
+            imageLoaded: false,
+            activeIndex: 0,
+            lights: [
+                {
+                    id: 1,
+                    name: '光レイヤー 1',
+                    xPct: 30,
+                    yPct: 45,
+                    widthPct: 40,
+                    heightPct: 10,
+                    angle: 0,
+                    opacity: 0.95,
+                    blur: 15,
+                    type: 'glow-bar',
+                    gradientEdge: true
+                }
+            ],
+            isDragging: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            initialLightX: 0,
+            initialLightY: 0
+        };
+
+        // DOM Elements
+        const fileInput = document.getElementById('file-input');
+        const fileInputReplace = document.getElementById('file-input-replace');
+        const uploadContainer = document.getElementById('upload-container');
+        const workspaceContainer = document.getElementById('workspace-container');
+        const changeImageWrapper = document.getElementById('change-image-wrapper');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const downloadBtn = document.getElementById('download-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const addLayerBtn = document.getElementById('add-layer-btn');
+        const deleteLayerBtn = document.getElementById('delete-layer-btn');
+        const layerListContainer = document.getElementById('layer-list');
+        const activeLayerTitle = document.getElementById('active-layer-title');
+
+        // Control Inputs
+        const effectTypeSelect = document.getElementById('effect-type');
+        const rangeWidth = document.getElementById('range-width');
+        const rangeHeight = document.getElementById('range-height');
+        const rangeX = document.getElementById('range-x');
+        const rangeY = document.getElementById('range-y');
+        const rangeAngle = document.getElementById('range-angle');
+        const rangeOpacity = document.getElementById('range-opacity');
+        const rangeBlur = document.getElementById('range-blur');
+        const checkGradient = document.getElementById('check-gradient');
+
+        // Value Labels
+        const valWidth = document.getElementById('val-width');
+        const valHeight = document.getElementById('val-height');
+        const valX = document.getElementById('val-x');
+        const valY = document.getElementById('val-y');
+        const valAngle = document.getElementById('val-angle');
+        const valOpacity = document.getElementById('val-opacity');
+        const valBlur = document.getElementById('val-blur');
+
+        // Modal Elements
+        const modal = document.getElementById('notification-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalClose = document.getElementById('modal-close');
+
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.classList.remove('hidden');
+        }
+        modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+
+        function loadSampleImage() {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                state.image = img;
+                state.imageLoaded = true;
+                uploadContainer.classList.add('hidden');
+                workspaceContainer.classList.remove('hidden');
+                changeImageWrapper.classList.remove('hidden');
+                downloadBtn.removeAttribute('disabled');
+                renderCanvas();
+            };
+            img.src = 'https://placehold.co/900x600/1e293b/38bdf8?text=Anime+Sample+Character';
+        }
+
+        document.getElementById('demo-img-1').addEventListener('click', loadSampleImage);
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    state.image = img;
+                    state.imageLoaded = true;
+                    uploadContainer.classList.add('hidden');
+                    workspaceContainer.classList.remove('hidden');
+                    changeImageWrapper.classList.remove('hidden');
+                    downloadBtn.removeAttribute('disabled');
+                    renderCanvas();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        fileInput.addEventListener('change', handleImageUpload);
+        fileInputReplace.addEventListener('change', handleImageUpload);
+
+        function getActiveLight() {
+            return state.lights[state.activeIndex] || state.lights[0];
+        }
+
+        function updateLayerListUI() {
+            layerListContainer.innerHTML = '';
+            state.lights.forEach((light, index) => {
+                const isActive = index === state.activeIndex;
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer border transition-all ${
+                    isActive ? 'bg-cyan-500/10 border-cyan-500/50 text-white font-semibold' : 'bg-dark-900 border-dark-700 text-slate-400 hover:bg-dark-700/50'
+                }`;
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full ${isActive ? 'bg-cyan-400' : 'bg-slate-600'}"></span>
+                        <span>${light.name} (${light.type})</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-500">#${index + 1}</span>
+                `;
+                item.addEventListener('click', () => {
+                    state.activeIndex = index;
+                    syncUIFromState();
+                    renderCanvas();
+                    updateLayerListUI();
+                });
+                layerListContainer.appendChild(item);
+            });
+
+            activeLayerTitle.textContent = `${getActiveLight().name} の調整`;
+            deleteLayerBtn.style.display = state.lights.length > 1 ? 'block' : 'none';
+        }
+
+        function syncUIFromState() {
+            const l = getActiveLight();
+            effectTypeSelect.value = l.type;
+            rangeWidth.value = l.widthPct;
+            rangeHeight.value = l.heightPct;
+            rangeX.value = l.xPct;
+            rangeY.value = l.yPct;
+            rangeAngle.value = l.angle;
+            rangeOpacity.value = Math.round(l.opacity * 100);
+            rangeBlur.value = l.blur;
+            checkGradient.checked = l.gradientEdge;
+
+            valWidth.textContent = l.widthPct + '%';
+            valHeight.textContent = l.heightPct + '%';
+            valX.textContent = l.xPct + '%';
+            valY.textContent = l.yPct + '%';
+            valAngle.textContent = l.angle + '°';
+            valOpacity.textContent = Math.round(l.opacity * 100) + '%';
+            valBlur.textContent = l.blur + 'px';
+        }
+
+        addLayerBtn.addEventListener('click', () => {
+            const newId = state.lights.length + 1;
+            state.lights.push({
+                id: newId,
+                name: `光レイヤー ${newId}`,
+                xPct: 50 + (state.lights.length * 5),
+                yPct: 50 + (state.lights.length * 5),
+                widthPct: 35,
+                heightPct: 10,
+                angle: 0,
+                opacity: 0.95,
+                blur: 15,
+                type: 'glow-bar',
+                gradientEdge: true
+            });
+            state.activeIndex = state.lights.length - 1;
+            syncUIFromState();
+            updateLayerListUI();
+            renderCanvas();
+        });
+
+        deleteLayerBtn.addEventListener('click', () => {
+            if (state.lights.length <= 1) return;
+            state.lights.splice(state.activeIndex, 1);
+            state.activeIndex = Math.max(0, state.activeIndex - 1);
+            syncUIFromState();
+            updateLayerListUI();
+            renderCanvas();
+        });
+
+        effectTypeSelect.addEventListener('change', (e) => {
+            getActiveLight().type = e.target.value;
+            renderCanvas();
+            updateLayerListUI();
+        });
+
+        rangeWidth.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            getActiveLight().widthPct = val;
+            valWidth.textContent = val + '%';
+            renderCanvas();
+        });
+
+        rangeHeight.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            getActiveLight().heightPct = val;
+            valHeight.textContent = val + '%';
+            renderCanvas();
+        });
+
+        rangeX.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            getActiveLight().xPct = val;
+            valX.textContent = val + '%';
+            renderCanvas();
+        });
+
+        rangeY.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            getActiveLight().yPct = val;
+            valY.textContent = val + '%';
+            renderCanvas();
+        });
+
+        rangeAngle.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            getActiveLight().angle = val;
+            valAngle.textContent = val + '°';
+            renderCanvas();
+        });
+
+        rangeOpacity.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            getActiveLight().opacity = val / 100;
+            valOpacity.textContent = val + '%';
+            renderCanvas();
+        });
+
+        rangeBlur.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            getActiveLight().blur = val;
+            valBlur.textContent = val + 'px';
+            renderCanvas();
+        });
+
+        checkGradient.addEventListener('change', (e) => {
+            getActiveLight().gradientEdge = e.target.checked;
+            renderCanvas();
+        });
+
+        // Quick alignment buttons
+        document.querySelectorAll('.align-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.getAttribute('data-align');
+                const l = getActiveLight();
+                if (type === 'center') {
+                    l.xPct = 50;
+                    l.yPct = 50;
+                } else if (type === 'horizontal') {
+                    l.xPct = 50;
+                    l.yPct = 50;
+                    l.widthPct = 120;
+                    l.heightPct = 15;
+                    l.angle = 0;
+                } else if (type === 'vertical') {
+                    l.xPct = 50;
+                    l.yPct = 50;
+                    l.widthPct = 15;
+                    l.heightPct = 120;
+                    l.angle = 0;
+                }
+                syncUIFromState();
+                renderCanvas();
+            });
+        });
+
+        function renderCanvas() {
+            if (!state.imageLoaded || !state.image) return;
+
+            const imgW = state.image.naturalWidth;
+            const imgH = state.image.naturalHeight;
+
+            canvas.width = imgW;
+            canvas.height = imgH;
+
+            ctx.clearRect(0, 0, imgW, imgH);
+            ctx.drawImage(state.image, 0, 0);
+
+            // Render all light layers
+            state.lights.forEach((light, idx) => {
+                ctx.save();
+
+                const cx = (light.xPct / 100) * imgW;
+                const cy = (light.yPct / 100) * imgH;
+                const w = (light.widthPct / 100) * imgW;
+                const h = (light.heightPct / 100) * imgH;
+
+                ctx.translate(cx, cy);
+                ctx.rotate((light.angle * Math.PI) / 180);
+                ctx.globalAlpha = light.opacity;
+
+                if (light.blur > 0) {
+                    ctx.filter = `blur(${light.blur}px)`;
+                }
+
+                const hw = w / 2;
+                const hh = h / 2;
+
+                if (light.type === 'glow-bar') {
+                    if (light.gradientEdge) {
+                        const grad = ctx.createLinearGradient(-hw, 0, hw, 0);
+                        grad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                        grad.addColorStop(0.15, 'rgba(255, 255, 255, 0.95)');
+                        grad.addColorStop(0.85, 'rgba(255, 255, 255, 0.95)');
+                        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                        ctx.fillStyle = grad;
+                    } else {
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                    }
+                    ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+                    ctx.shadowBlur = light.blur * 1.5;
+                    ctx.fillRect(-hw, -hh, w, h);
+                } 
+                else if (light.type === 'solid-bar') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(-hw, -hh, w, h);
+                } 
+                else if (light.type === 'black-bar') {
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(-hw, -hh, w, h);
+                }
+                else if (light.type === 'mosaic') {
+                    // Extract region and pixelate
+                    const sampleX = Math.max(0, Math.floor(cx - hw));
+                    const sampleY = Math.max(0, Math.floor(cy - hh));
+                    const sampleW = Math.max(10, Math.floor(w));
+                    const sampleH = Math.max(10, Math.floor(h));
+                    
+                    try {
+                        const pixelSize = Math.max(6, Math.floor(Math.min(w, h) / 10));
+                        ctx.imageSmoothingEnabled = false;
+                        // Draw downscaled then upscaled version for mosaic
+                        const tempCanvas = document.createElement('canvas');
+                        const tCtx = tempCanvas.getContext('2d');
+                        tempCanvas.width = Math.max(2, Math.floor(sampleW / pixelSize));
+                        tempCanvas.height = Math.max(2, Math.floor(sampleH / pixelSize));
+                        
+                        tCtx.drawImage(state.image, sampleX, sampleY, sampleW, sampleH, 0, 0, tempCanvas.width, tempCanvas.height);
+                        ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, -hw, -hh, w, h);
+                        ctx.imageSmoothingEnabled = true;
+                    } catch(err) {
+                        ctx.fillStyle = '#888888';
+                        ctx.fillRect(-hw, -hh, w, h);
+                    }
+                }
+                else if (light.type === 'steam') {
+                    const grad = ctx.createRadialGradient(0, 0, 10, 0, 0, Math.max(hw, hh));
+                    grad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+                    grad.addColorStop(0.5, 'rgba(240, 245, 255, 0.7)');
+                    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, hw, hh, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            });
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (!state.imageLoaded) return;
+            state.isDragging = true;
+            state.dragStartX = e.clientX;
+            state.dragStartY = e.clientY;
+            const l = getActiveLight();
+            state.initialLightX = l.xPct;
+            state.initialLightY = l.yPct;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!state.isDragging || !state.imageLoaded) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const dx = (e.clientX - state.dragStartX) * scaleX;
+            const dy = (e.clientY - state.dragStartY) * scaleY;
+
+            const l = getActiveLight();
+            l.xPct = Math.round(state.initialLightX + (dx / canvas.width) * 100);
+            l.yPct = Math.round(state.initialLightY + (dy / canvas.height) * 100);
+
+            syncUIFromState();
+            renderCanvas();
+        });
+
+        window.addEventListener('mouseup', () => {
+            state.isDragging = false;
+        });
+
+        // Touch support for mobile devices
+        canvas.addEventListener('touchstart', (e) => {
+            if (!state.imageLoaded || e.touches.length === 0) return;
+            state.isDragging = true;
+            state.dragStartX = e.touches[0].clientX;
+            state.dragStartY = e.touches[0].clientY;
+            const l = getActiveLight();
+            state.initialLightX = l.xPct;
+            state.initialLightY = l.yPct;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!state.isDragging || !state.imageLoaded || e.touches.length === 0) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const dx = (e.touches[0].clientX - state.dragStartX) * scaleX;
+            const dy = (e.touches[0].clientY - state.dragStartY) * scaleY;
+
+            const l = getActiveLight();
+            l.xPct = Math.round(state.initialLightX + (dx / canvas.width) * 100);
+            l.yPct = Math.round(state.initialLightY + (dy / canvas.height) * 100);
+
+            syncUIFromState();
+            renderCanvas();
+        });
+
+        window.addEventListener('touchend', () => {
+            state.isDragging = false;
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!state.imageLoaded) return;
+            renderCanvas();
+            const link = document.createElement('a');
+            link.download = 'mystery_light_image.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            state.lights = [{
+                id: 1,
+                name: '光レイヤー 1',
+                xPct: 30,
+                yPct: 45,
+                widthPct: 40,
+                heightPct: 10,
+                angle: 0,
+                opacity: 0.95,
+                blur: 15,
+                type: 'glow-bar',
+                gradientEdge: true
+            }];
+            state.activeIndex = 0;
+            syncUIFromState();
+            updateLayerListUI();
+            renderCanvas();
+        });
+
+        // Initialize UI on load
+        updateLayerListUI();
+        syncUIFromState();
+    </script>
+</body>
+</html>
