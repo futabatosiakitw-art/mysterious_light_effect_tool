@@ -30,7 +30,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* 全体のスクロールを禁止 */
+            overflow: hidden;
         }
 
         header {
@@ -71,7 +71,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* チェック柄の背景 */
             background-image: 
                 linear-gradient(45deg, var(--panel-border) 25%, transparent 25%), 
                 linear-gradient(-45deg, var(--panel-border) 25%, transparent 25%), 
@@ -93,20 +92,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 画像のサイズに合わせてコンテナもリサイズされるようにする */
-            line-height: 0; 
+            line-height: 0;
         }
 
         canvas {
             display: block;
-            /* CSSでサイズを固定せず、親コンテナに合わせる */
             max-width: 100%;
-            max-height: calc(100vh - 90px); /* ヘッダーとパディング分を引く */
+            max-height: calc(100vh - 90px);
             width: auto;
             height: auto;
             object-fit: contain;
             cursor: crosshair;
-            /* 画像の背景を白にする（透過PNG対策） */
             background-color: white;
         }
 
@@ -275,7 +271,7 @@
         }
 
         input[type="number"] {
-            width: 60px;
+            width: 65px;
             background-color: var(--bg-color);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
@@ -283,13 +279,6 @@
             border-radius: 0.3rem;
             font-size: 0.85rem;
             text-align: right;
-            appearance: textfield; /* スピンボタンを非表示にする（webkit以外） */
-        }
-
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            opacity: 1; /* スピンボタンを表示する（webkit） */
-            height: 1.5rem;
         }
 
         select, input[type="color"] {
@@ -304,7 +293,6 @@
 
         select {
             cursor: pointer;
-            appearance: menulist;
         }
 
         input[type="color"] {
@@ -382,11 +370,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-sub);
         }
-
-        /* ツールチップ */
-        [title] {
-            position: relative;
-        }
     </style>
 </head>
 <body>
@@ -425,9 +408,7 @@
                     <span>光レイヤー</span>
                     <span id="layerCount" style="font-size: 0.8rem; color: var(--text-sub);">0個</span>
                 </h3>
-                <div class="layer-list" id="layerList">
-                    <!-- 動的に追加 -->
-                </div>
+                <div class="layer-list" id="layerList"></div>
                 <button class="btn btn-primary" id="addLightBtn">+ 光を追加</button>
             </div>
 
@@ -454,4 +435,419 @@
                     <label class="control-label"><span>位置 X (%)</span></label>
                     <div class="control-inputs">
                         <input type="range" id="posXRange" min="-150" max="150" step="1" value="0">
-                        <input type="
+                        <input type="number" id="posXNum" min="-150" max="150" step="1" value="0">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label"><span>位置 Y (%)</span></label>
+                    <div class="control-inputs">
+                        <input type="range" id="posYRange" min="-150" max="150" step="1" value="0">
+                        <input type="number" id="posYNum" min="-150" max="150" step="1" value="0">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label"><span>幅 (%) <small style="color:var(--text-sub);">※長辺基準</small></span></label>
+                    <div class="control-inputs">
+                        <input type="range" id="widthRange" min="5" max="150" step="1" value="60">
+                        <input type="number" id="widthNum" min="5" max="150" step="1" value="60">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label"><span>高さ (%) <small style="color:var(--text-sub);">※長辺基準</small></span></label>
+                    <div class="control-inputs">
+                        <input type="range" id="heightRange" min="1" max="150" step="1" value="15">
+                        <input type="number" id="heightNum" min="1" max="150" step="1" value="15">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label"><span>角度 (度)</span></label>
+                    <div class="control-inputs">
+                        <input type="range" id="angleRange" min="-180" max="180" step="1" value="0">
+                        <input type="number" id="angleNum" min="-180" max="180" step="1" value="0">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label"><span>不透明度 (%)</span></label>
+                    <div class="control-inputs">
+                        <input type="range" id="opacityRange" min="0" max="100" step="1" value="100">
+                        <input type="number" id="opacityNum" min="0" max="100" step="1" value="100">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label"><span>ぼかし (px)</span></label>
+                    <div class="control-inputs">
+                        <input type="range" id="blurRange" min="0" max="50" step="1" value="10">
+                        <input type="number" id="blurNum" min="0" max="50" step="1" value="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- エクスポート -->
+            <div class="panel-section">
+                <button class="btn btn-primary" id="downloadBtn" style="padding: 0.8rem;">画像をダウンロード (PNG)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            image: null,
+            imageName: '',
+            baseSize: 0,
+            lights: [],
+            activeLightId: null
+        };
+
+        const workspace = document.getElementById('workspace');
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const changeImageBtn = document.getElementById('changeImageBtn');
+        const resetAllBtn = document.getElementById('resetAllBtn');
+        const addLightBtn = document.getElementById('addLightBtn');
+        const layerList = document.getElementById('layerList');
+        const layerCount = document.getElementById('layerCount');
+        const propertiesPanel = document.getElementById('propertiesPanel');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        const controls = {
+            type: document.getElementById('lightType'),
+            colorGroup: document.getElementById('colorGroup'),
+            color: document.getElementById('lightColor'),
+            posXRange: document.getElementById('posXRange'),
+            posXNum: document.getElementById('posXNum'),
+            posYRange: document.getElementById('posYRange'),
+            posYNum: document.getElementById('posYNum'),
+            widthRange: document.getElementById('widthRange'),
+            widthNum: document.getElementById('widthNum'),
+            heightRange: document.getElementById('heightRange'),
+            heightNum: document.getElementById('heightNum'),
+            angleRange: document.getElementById('angleRange'),
+            angleNum: document.getElementById('angleNum'),
+            opacityRange: document.getElementById('opacityRange'),
+            opacityNum: document.getElementById('opacityNum'),
+            blurRange: document.getElementById('blurRange'),
+            blurNum: document.getElementById('blurNum')
+        };
+
+        function updateUIState() {
+            const hasImage = state.image !== null;
+            dropzone.style.display = hasImage ? 'none' : 'flex';
+            
+            const hasActiveLight = state.activeLightId !== null && hasImage;
+            propertiesPanel.style.opacity = hasActiveLight ? '1' : '0.4';
+            propertiesPanel.style.pointerEvents = hasActiveLight ? 'auto' : 'none';
+            downloadBtn.classList.toggle('disabled', !hasImage);
+            addLightBtn.classList.toggle('disabled', !hasImage);
+        }
+
+        function handleImageFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            state.imageName = file.name;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    state.image = img;
+                    state.baseSize = Math.max(img.width, img.height);
+                    
+                    if (state.lights.length === 0) {
+                        addLightLayer();
+                    } else {
+                        updateCanvas();
+                        renderLayerList();
+                    }
+                    updateUIState();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) handleImageFile(e.target.files[0]);
+        });
+
+        workspace.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        workspace.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+        workspace.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files[0]) handleImageFile(e.dataTransfer.files[0]);
+        });
+
+        changeImageBtn.addEventListener('click', () => fileInput.click());
+        resetAllBtn.addEventListener('click', () => {
+            state.image = null;
+            state.lights = [];
+            state.activeLightId = null;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.width = 0;
+            canvas.height = 0;
+            updateUIState();
+            renderLayerList();
+        });
+
+        function addLightLayer() {
+            const id = 'light_' + Date.now();
+            const newLight = {
+                id: id,
+                name: `光レイヤー ${state.lights.length + 1}`,
+                type: 'white-glow',
+                color: '#ffffff',
+                posX: 0,
+                posY: 0,
+                width: 60,
+                height: 15,
+                angle: 0,
+                opacity: 100,
+                blur: 10
+            };
+            state.lights.push(newLight);
+            selectLight(id);
+        }
+
+        addLightBtn.addEventListener('click', () => {
+            if (!state.image) return;
+            addLightLayer();
+        });
+
+        function selectLight(id) {
+            state.activeLightId = id;
+            renderLayerList();
+            loadLightToControls();
+        }
+
+        function deleteLight(id, e) {
+            e.stopPropagation();
+            state.lights = state.lights.filter(l => l.id !== id);
+            if (state.activeLightId === id) {
+                state.activeLightId = state.lights.length > 0 ? state.lights[state.lights.length - 1].id : null;
+            }
+            renderLayerList();
+            loadLightToControls();
+            updateCanvas();
+            updateUIState();
+        }
+
+        function renderLayerList() {
+            layerList.innerHTML = '';
+            layerCount.textContent = `${state.lights.length}個`;
+            
+            state.lights.forEach((light) => {
+                const item = document.createElement('div');
+                item.className = `layer-item ${light.id === state.activeLightId ? 'active' : ''}`;
+                item.innerHTML = `
+                    <span class="layer-name">${light.name}</span>
+                    <div class="layer-actions">
+                        <button class="icon-btn delete" title="削除">×</button>
+                    </div>
+                `;
+                item.addEventListener('click', () => selectLight(light.id));
+                item.querySelector('.delete').addEventListener('click', (e) => deleteLight(light.id, e));
+                layerList.appendChild(item);
+            });
+        }
+
+        function loadLightToControls() {
+            const light = state.lights.find(l => l.id === state.activeLightId);
+            if (!light) return;
+
+            controls.type.value = light.type;
+            controls.color.value = light.color;
+            controls.colorGroup.style.display = (light.type === 'white-glow' || light.type === 'solid-color') ? 'block' : 'none';
+            
+            const setSyncVal = (range, num, val) => {
+                range.value = val;
+                num.value = val;
+            };
+
+            setSyncVal(controls.posXRange, controls.posXNum, light.posX);
+            setSyncVal(controls.posYRange, controls.posYNum, light.posY);
+            setSyncVal(controls.widthRange, controls.widthNum, light.width);
+            setSyncVal(controls.heightRange, controls.heightNum, light.height);
+            setSyncVal(controls.angleRange, controls.angleNum, light.angle);
+            setSyncVal(controls.opacityRange, controls.opacityNum, light.opacity);
+            setSyncVal(controls.blurRange, controls.blurNum, light.blur);
+        }
+
+        function updateActiveLightFromControls() {
+            const light = state.lights.find(l => l.id === state.activeLightId);
+            if (!light) return;
+
+            light.type = controls.type.value;
+            light.color = controls.color.value;
+            light.posX = parseFloat(controls.posXNum.value) || 0;
+            light.posY = parseFloat(controls.posYNum.value) || 0;
+            light.width = parseFloat(controls.widthNum.value) || 1;
+            light.height = parseFloat(controls.heightNum.value) || 1;
+            light.angle = parseFloat(controls.angleNum.value) || 0;
+            light.opacity = parseFloat(controls.opacityNum.value) || 0;
+            light.blur = parseFloat(controls.blurNum.value) || 0;
+
+            controls.colorGroup.style.display = (light.type === 'white-glow' || light.type === 'solid-color') ? 'block' : 'none';
+
+            updateCanvas();
+        }
+
+        function bindSyncInputs(range, num, callback) {
+            range.addEventListener('input', () => {
+                num.value = range.value;
+                callback();
+            });
+            num.addEventListener('input', () => {
+                range.value = num.value;
+                callback();
+            });
+        }
+
+        controls.type.addEventListener('change', updateActiveLightFromControls);
+        controls.color.addEventListener('input', updateActiveLightFromControls);
+        bindSyncInputs(controls.posXRange, controls.posXNum, updateActiveLightFromControls);
+        bindSyncInputs(controls.posYRange, controls.posYNum, updateActiveLightFromControls);
+        bindSyncInputs(controls.widthRange, controls.widthNum, updateActiveLightFromControls);
+        bindSyncInputs(controls.heightRange, controls.heightNum, updateActiveLightFromControls);
+        bindSyncInputs(controls.angleRange, controls.angleNum, updateActiveLightFromControls);
+        bindSyncInputs(controls.opacityRange, controls.opacityNum, updateActiveLightFromControls);
+        bindSyncInputs(controls.blurRange, controls.blurNum, updateActiveLightFromControls);
+
+        function updateCanvas() {
+            if (!state.image) return;
+
+            canvas.width = state.image.width;
+            canvas.height = state.image.height;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(state.image, 0, 0);
+
+            const baseSize = state.baseSize;
+
+            state.lights.forEach(light => {
+                ctx.save();
+                ctx.globalAlpha = light.opacity / 100;
+
+                const w = (light.width / 100) * baseSize;
+                const h = (light.height / 100) * baseSize;
+                
+                const centerX = canvas.width / 2 + (light.posX / 100) * baseSize;
+                const centerY = canvas.height / 2 + (light.posY / 100) * baseSize;
+
+                ctx.translate(centerX, centerY);
+                ctx.rotate((light.angle * Math.PI) / 180);
+
+                const x = -w / 2;
+                const y = -h / 2;
+
+                if (light.type === 'white-glow') {
+                    ctx.shadowColor = light.color;
+                    ctx.shadowBlur = light.blur * (baseSize / 800);
+                    
+                    const grad = ctx.createLinearGradient(0, y, 0, y + h);
+                    grad.addColorStop(0, 'rgba(255,255,255,0)');
+                    grad.addColorStop(0.3, light.color);
+                    grad.addColorStop(0.7, light.color);
+                    grad.addColorStop(1, 'rgba(255,255,255,0)');
+
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(x, y, w, h);
+                } 
+                else if (light.type === 'black-bar') {
+                    if (light.blur > 0) {
+                        ctx.filter = `blur(${light.blur * (baseSize / 800)}px)`;
+                    }
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(x, y, w, h);
+                } 
+                else if (light.type === 'mosaic') {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(x, y, w, h);
+                    ctx.clip();
+                    
+                    ctx.filter = `blur(${Math.max(4, light.blur * (baseSize / 400))}px)`;
+                    ctx.drawImage(state.image, 0, 0);
+                    ctx.restore();
+                } 
+                else if (light.type === 'solid-color') {
+                    if (light.blur > 0) {
+                        ctx.filter = `blur(${light.blur * (baseSize / 800)}px)`;
+                    }
+                    ctx.fillStyle = light.color;
+                    ctx.fillRect(x, y, w, h);
+                }
+
+                ctx.restore();
+            });
+        }
+
+        let isDraggingCanvas = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let initialLightPosX = 0;
+        let initialLightPosY = 0;
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (!state.image || !state.activeLightId) return;
+            isDraggingCanvas = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            
+            const light = state.lights.find(l => l.id === state.activeLightId);
+            initialLightPosX = light.posX;
+            initialLightPosY = light.posY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDraggingCanvas) return;
+            const light = state.lights.find(l => l.id === state.activeLightId);
+            if (!light) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const dx = (e.clientX - dragStartX) * scaleX;
+            const dy = (e.clientY - dragStartY) * scaleY;
+
+            const deltaPercentX = (dx / state.baseSize) * 100;
+            const deltaPercentY = (dy / state.baseSize) * 100;
+
+            light.posX = Math.max(-150, Math.min(150, Math.round(initialLightPosX + deltaPercentX)));
+            light.posY = Math.max(-150, Math.min(150, Math.round(initialLightPosY + deltaPercentY)));
+
+            loadLightToControls();
+            updateCanvas();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingCanvas = false;
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!state.image) return;
+            updateCanvas();
+
+            const link = document.createElement('a');
+            const originalName = state.imageName.substring(0, state.imageName.lastIndexOf('.')) || 'image';
+            link.download = `${originalName}_light.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        updateUIState();
+    </script>
+</body>
+</html>
