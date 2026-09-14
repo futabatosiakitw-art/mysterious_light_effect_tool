@@ -356,6 +356,46 @@
             pointer-events: none;
         }
 
+        /* プロモーションセクション */
+        .promo-section {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .promo-banner {
+            display: block;
+            width: 100%;
+            border-radius: 0.4rem;
+            overflow: hidden;
+            border: 1px solid var(--panel-border);
+            transition: border-color 0.2s;
+        }
+
+        .promo-banner:hover {
+            border-color: var(--accent);
+        }
+
+        .promo-banner img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .twitter-link {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .twitter-link:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
         /* スクロールバー装飾 */
         ::-webkit-scrollbar {
             width: 8px;
@@ -492,6 +532,13 @@
             <!-- エクスポート -->
             <div class="panel-section">
                 <button class="btn btn-primary" id="downloadBtn" style="padding: 0.9rem;">画像をダウンロード (PNG)</button>
+                
+                <div class="promo-section">    
+                    <a href="https://twitter.com/futaba_to_siaki" target="_blank" class="promo-banner">      
+                        <img src="banner.png" alt="フタバとシアキの工房">    
+                    </a>    
+                    <a href="https://twitter.com/futaba_to_siaki" target="_blank" class="twitter-link">      これ置いた人の𝕏    </a>  
+                </div>
             </div>
         </div>
     </div>
@@ -814,7 +861,7 @@
 
         window.addEventListener('mousemove', (e) => {
             if (!isDraggingCanvas) return;
-            const light = state.lights.exports ? null : state.lights.find(l => l.id === state.activeLightId); // safeguard
+            const light = state.lights.find(l => l.id === state.activeLightId);
             if (!light) return;
 
             const rect = canvas.getBoundingClientRect();
